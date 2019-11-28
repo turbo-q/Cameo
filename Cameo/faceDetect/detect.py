@@ -11,21 +11,26 @@ def read_img(path='./data/faceCsv.txt',sz=None):
     :param sz: 样本大小如果没有改变为200*200 将其改变
     :return: 训练样本
     """
-
+# 图片所在文件
     imgDataPath='./data/img'
     # 分别存储图像数组和标签
     X,y=[],[]
+    # 打开数据所在文件
     for line in open(path):
        try:
         # 舍弃\n
         line=line.strip('\n')
+        # 图像名
         imgLine=line.split(';')[0]
+        # 图像对应标签
         labelLine=line.split(';')[1]
+        # 读取图片
         im=cv2.imread(os.path.join(imgDataPath,imgLine),cv2.IMREAD_GRAYSCALE)
 
         if sz is not None:
+            # 转化为200*200
             im=cv2.resize(im,(200,200))
-
+# 
         X.append(np.asarray(im,dtype=np.uint8))
         y.append(labelLine)
        except:
@@ -75,19 +80,22 @@ def face_rec():
 
         faces=face_cascade.detectMultiScale(gray,1.03,10,minSize=(70,70))
         for (x,y,w,h) in faces:
+            # 画矩形范围
             cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,255),2)
             roi=gray[y:y+h,x:x+w]
             try:
+                # 调整为200*200
                 roi=cv2.resize(roi,(200,200))
                 # 传入数据进行预测
                 params=model.predict(roi)
                 print("Label:{0},Confidence:{1:.3f}".format(params[0],params[1]))
-
+# 在图像中打印人脸信息
                 cv2.putText(frame,names[str(params[0])],(x,y-20),cv2.FONT_HERSHEY_SIMPLEX,1,255,2)
             except:
                 continue
 
         cv2.imshow('camera', frame)
+        # 按Q退出
         if cv2.waitKey(1000//12) & 0xff==ord('q'):
             break
     camera.release()
